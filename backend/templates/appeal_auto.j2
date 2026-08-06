@@ -1,0 +1,83 @@
+{{ today_date }}
+
+[YOUR NAME]
+[YOUR ADDRESS]
+[YOUR PHONE]
+[YOUR EMAIL]
+
+RE: FORMAL APPEAL OF CLAIM DENIAL
+Claim Number: {{ denial_extract.claim_number }}
+Date of Denial: {{ denial_extract.denial_date }}
+
+{{ denial_extract.insurer_name }}
+Appeals Department
+{{ denial_extract.insurer_contact }}
+
+Dear Appeals Department,
+
+I am writing to formally appeal the denial of my {% if denial_extract.claim_type.value == 'auto' %}auto insurance{% else %}property damage{% endif %} claim referenced above. I received a denial letter dated {{ denial_extract.denial_date }} citing the following reason:
+
+  "{{ denial_extract.denial_reason_raw }}"
+
+I respectfully disagree with this determination and submit this appeal pursuant to my rights under my insurance policy and applicable state insurance regulations.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BASIS FOR THIS APPEAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{% if rebuttals %}
+{% for rebuttal in rebuttals %}
+{{ loop.index }}. {{ rebuttal.argument }}
+{% if rebuttal.supporting_clause and rebuttal.supporting_clause != "NO_SUPPORTING_CLAUSE_FOUND" %}
+
+   My policy states:
+
+   | "{{ rebuttal.supporting_clause }}"
+{% if rebuttal.clause_verified %}
+   [Clause verified in policy document]
+{% else %}
+   [Note: Please refer to the policy document for full context of this clause]
+{% endif %}
+{% endif %}
+
+{% endfor %}
+{% else %}
+Based on my review of my policy, I believe this denial may not be consistent with the coverage terms I purchased. I respectfully request a complete review of this claim by a qualified human adjuster.
+{% endif %}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUPPORTING DOCUMENTATION ENCLOSED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The following documents support this appeal (or will be provided upon request):
+{% for item in evidence_needed %}
+{{ loop.index }}. [{{ item.priority }}] {{ item.document }}
+   Purpose: {{ item.reason }}
+{% endfor %}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CLOSING AND REQUESTED ACTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+I respectfully request that you reconsider and overturn the denial of the above-referenced claim. Please provide a written response within 30 days of receipt of this appeal.
+
+If my internal appeal is denied, I reserve the right to:
+1. File a formal complaint with the State Insurance Commissioner in the state where this policy was issued.
+2. Invoke the Appraisal Clause of my policy (if applicable) to resolve disputes over the amount of loss.
+3. Pursue all other remedies available to me under state insurance law and my policy contract.
+
+This appeal is submitted in good faith and I reserve all rights and remedies available to me under my policy and applicable law.
+
+Sincerely,
+
+[YOUR NAME]
+[YOUR SIGNATURE]
+{{ today_date }}
+
+Enclosures: As listed above
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISCLAIMER: This appeal letter was prepared with AI assistance (ClaimClear) for
+educational purposes only. It has not been reviewed by a licensed attorney or
+insurance professional. Review with a qualified insurance professional before
+submitting. ClaimClear does not provide legal advice.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

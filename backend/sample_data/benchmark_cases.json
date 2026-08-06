@@ -1,0 +1,83 @@
+[
+  {
+    "case_id": "TC-001",
+    "description": "Health: MRI denied as not medically necessary when policy explicitly covers diagnostic imaging after conservative treatment — but conservative treatment WAS completed",
+    "denial_reason": "The MRI of the lumbar spine (CPT 72148) is denied as not medically necessary. Per Section 4.2 of your plan document, advanced diagnostic imaging requires documented failure of at least six weeks of conservative treatment (physical therapy and/or chiropractic care). The submitted clinical records do not include documentation confirming a completed course of conservative care prior to this referral.",
+    "relevant_policy_clause": "Section 4.2 — Diagnostic Imaging Coverage. The Plan provides coverage for Magnetic Resonance Imaging (MRI) and other advanced diagnostic imaging when the following criteria are met: (a) the service is ordered by a licensed treating physician; (b) the member has completed and documented a minimum of six (6) weeks of conservative treatment including but not limited to physical therapy, chiropractic care, or anti-inflammatory medication; and (c) conservative treatment has been documented as ineffective or the member's condition has acutely worsened. Documentation may include physician chart notes, physical therapy discharge summaries, or a treating physician letter of medical necessity.",
+    "expected_denial_valid": false,
+    "expected_rebuttals_contain": [
+      "conservative treatment was completed",
+      "physician records document prior treatment",
+      "Section 4.2 criteria are met"
+    ],
+    "expected_evidence_contains": [
+      "Physical therapy records or discharge summary",
+      "Treating physician letter of medical necessity",
+      "Explanation of Benefits"
+    ]
+  },
+  {
+    "case_id": "TC-002",
+    "description": "Auto: Collision repair denied citing a named driver exclusion, but the driver at the time of the accident is not the excluded driver",
+    "denial_reason": "Your claim for collision repair of your 2021 Honda Accord (VIN: 1HGCV1F30MA012345) following the accident on March 8, 2025 is denied pursuant to the Named Driver Exclusion Endorsement attached to your policy. The exclusion endorsement identifies Marcus T. Rodriguez as an excluded driver. Coverage is voided when an excluded driver operates the insured vehicle. Our investigation indicates the vehicle was driven by Marcus Rodriguez at the time of the loss.",
+    "relevant_policy_clause": "Named Driver Exclusion Endorsement — Policy Endorsement NDE-007. This endorsement excludes coverage for any loss occurring while the insured vehicle is operated by: Marcus T. Rodriguez (DOB: 04/15/1988). This exclusion applies only to the individual named above. Coverage remains in full effect for all other licensed drivers listed on the policy declarations page, including additional household members, provided they hold a valid driver's license and the vehicle is used for covered purposes as defined in Section 2.1.",
+    "expected_denial_valid": false,
+    "expected_rebuttals_contain": [
+      "the driver at time of accident was not Marcus T. Rodriguez",
+      "exclusion applies only to the named individual",
+      "other licensed drivers retain full coverage"
+    ],
+    "expected_evidence_contains": [
+      "Police accident report confirming driver identity",
+      "Driver's license of actual driver at time of accident",
+      "Witness statements or photos confirming who was driving"
+    ]
+  },
+  {
+    "case_id": "TC-003",
+    "description": "Property: Water damage denied as excluded 'flood damage' but the actual cause was a burst interior pipe, not a flood",
+    "denial_reason": "Your homeowner's insurance claim for water damage to the basement and lower level of your residence at 15 Oak Street is denied. Per Section 7 (Exclusions) of your Homeowner's Policy, this policy does not cover loss or damage caused directly or indirectly by flood, surface water, waves, tidal water, overflow of a body of water, or spray from any of these, whether or not driven by wind. The damage reported is consistent with water intrusion from an external source and is therefore excluded under the flood exclusion provision.",
+    "relevant_policy_clause": "Section 6 — Perils Insured Against. This policy covers accidental direct physical loss to your dwelling caused by: (Item 12) Accidental discharge or overflow of water or steam from within a plumbing, heating, air conditioning, or automatic fire protective sprinkler system, or from within a household appliance. This coverage applies to sudden and accidental discharge from systems within the structure. Section 7 — Exclusions. This policy does NOT cover loss caused by: flood, surface water, waves, tidal water, or overflow of a body of water. Note: damage caused by a burst or leaking pipe WITHIN the dwelling is covered under Section 6, Item 12, and is NOT subject to the flood exclusion of Section 7.",
+    "expected_denial_valid": false,
+    "expected_rebuttals_contain": [
+      "cause of loss was a burst interior pipe, not flood",
+      "Section 6 Item 12 covers burst pipe damage",
+      "flood exclusion does not apply to internal plumbing failures"
+    ],
+    "expected_evidence_contains": [
+      "Plumber's report confirming burst pipe as cause of damage",
+      "Photos of pipe failure location",
+      "Contractor damage assessment report"
+    ]
+  },
+  {
+    "case_id": "TC-004",
+    "description": "Health: Prescription denied as 'not a covered benefit' but the drug IS listed in the plan's formulary under a covered tier",
+    "denial_reason": "Your prescription claim for Ozempic (semaglutide injection, 0.5mg) submitted to Meridian Pharmacy Benefits on November 10, 2024 is denied. This medication is not a covered benefit under your current health plan. The Meridian Standard Formulary applicable to your plan does not include semaglutide products for the treatment of Type 2 Diabetes at the submitted dosage. Please consult your physician about alternative covered medications.",
+    "relevant_policy_clause": "Meridian Standard Drug Formulary — Tier 3 (Preferred Brand) — Effective January 1, 2024. The following medications are covered under your plan subject to the Tier 3 cost-sharing requirements (30% coinsurance after deductible): Ozempic (semaglutide) injection — 0.25mg, 0.5mg, 1.0mg — Covered indication: Type 2 Diabetes Mellitus management in conjunction with diet and exercise. Prior authorization is required for dosages exceeding 1.0mg/week. Standard dosages at 0.25mg and 0.5mg do not require prior authorization when prescribed by a licensed endocrinologist or primary care physician for an approved indication.",
+    "expected_denial_valid": false,
+    "expected_rebuttals_contain": [
+      "Ozempic 0.5mg is listed in the Tier 3 formulary",
+      "no prior authorization required for standard dosage",
+      "denial is factually incorrect based on formulary"
+    ],
+    "expected_evidence_contains": [
+      "Current formulary document showing Ozempic listing",
+      "Prescribing physician's documentation of Type 2 Diabetes diagnosis",
+      "Pharmacy benefit explanation showing claim details"
+    ]
+  },
+  {
+    "case_id": "TC-005",
+    "description": "Health: Denial IS valid — experimental cancer treatment explicitly excluded by policy. Expected denial_valid = true.",
+    "denial_reason": "Your claim for CAR-T cell therapy (Tisagenlecleucel, CPT 0537T) administered at Memorial Cancer Center on September 15, 2024 is denied. Per Section 11.4 (Experimental and Investigational Treatments) of your policy, this plan does not cover treatments, procedures, or drugs that are classified as experimental or investigational. CAR-T cell therapy for the submitted diagnosis code is currently under active clinical trial review and has not received a final coverage determination under your plan's clinical coverage policy. This determination was made consistent with your plan's Experimental Treatment Review Committee guidelines.",
+    "relevant_policy_clause": "Section 11.4 — Experimental and Investigational Services. This plan expressly excludes coverage for any service, supply, drug, device, or procedure that the Plan determines to be experimental or investigational. A service is considered experimental or investigational if: (a) it is the subject of ongoing Phase I, II, or III clinical trials; (b) it has not been approved by the relevant regulatory authority (e.g., FDA) for the specific diagnosis or indication submitted; or (c) the Plan's Experimental Treatment Review Committee has not issued a positive coverage determination. This exclusion applies regardless of a treating physician's recommendation. CAR-T cell therapy protocols currently under clinical evaluation for indications other than B-cell ALL in adult patients are classified as experimental pending further evidence review.",
+    "expected_denial_valid": true,
+    "expected_rebuttals_contain": [],
+    "expected_evidence_contains": [
+      "FDA approval documentation for specific indication",
+      "Published peer-reviewed clinical evidence supporting medical necessity",
+      "Request for Experimental Treatment Review Committee reconsideration"
+    ]
+  }
+]
