@@ -11,7 +11,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -118,14 +118,21 @@ if frontend_dir.exists():
 # ENDPOINTS
 # ══════════════════════════════════════════════════════════════════════════════
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root():
+    """Redirect root path to ClaimClear frontend web app."""
+    return RedirectResponse(url="/app/")
+
+
+@app.get("/api")
+async def api_info():
+    """API info endpoint."""
     return {
         "name": "ClaimClear API",
         "version": config.VERSION,
         "status": "healthy",
         "docs": "/docs",
-        "frontend": "/app",
+        "frontend": "/app/",
     }
 
 
