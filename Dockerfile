@@ -12,8 +12,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /build
 COPY backend/requirements.txt .
 
-# Install CPU-only torch first to prevent downloading 2.5GB+ CUDA binaries (avoids Render build timeouts)
-RUN pip install --prefix=/install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+# Install lightweight dependencies
 RUN pip install --prefix=/install --no-cache-dir -r requirements.txt
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
@@ -38,11 +37,7 @@ COPY backend/ ./
 # Copy frontend for static file serving
 COPY frontend/ ../frontend/
 
-# Pre-cache embedding model so container starts instantly without waiting for download at boot
-ENV HF_HOME=/home/claimclear/.cache/huggingface
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
-
-RUN chown -R claimclear:claimclear /app /home/claimclear && \
+RUN chown -R claimclear:claimclear /app && \
     chown -R claimclear:claimclear /app/../frontend 2>/dev/null || true
 
 USER claimclear
