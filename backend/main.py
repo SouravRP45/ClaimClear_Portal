@@ -58,11 +58,10 @@ async def lifespan(app: FastAPI):
     templates_dir = str(Path(__file__).parent / "templates")
     appeal_generator = AppealGenerator(templates_dir)
 
-    # Warm up embedding model
-    logger.info("Warming up sentence-transformer model...")
+    # Initialize RAG engine
+    logger.info("Initializing RAG engine...")
     rag_engine = RAGEngine()
-    _ = rag_engine.model.encode(["warming up"], show_progress_bar=False)
-    logger.info("Model warm-up complete. ClaimClear is ready.")
+    logger.info("ClaimClear is ready.")
 
     yield
 
