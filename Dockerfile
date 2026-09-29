@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /build
 COPY backend/requirements.txt .
+
+# Install CPU-only torch first to prevent downloading 2.5GB+ CUDA binaries (avoids Render build timeouts)
+RUN pip install --prefix=/install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --prefix=/install --no-cache-dir -r requirements.txt
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
@@ -35,7 +38,11 @@ COPY backend/ ./
 # Copy frontend for static file serving
 COPY frontend/ ../frontend/
 
-RUN chown -R claimclear:claimclear /app && \
+# Pre-cache embedding model so container starts instantly without waiting for download at boot
+ENV HF_HOME=/home/claimclear/.cache/huggingface
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
+RUN chown -R claimclear:claimclear /app /home/claimclear && \
     chown -R claimclear:claimclear /app/../frontend 2>/dev/null || true
 
 USER claimclear
@@ -46,6 +53,6 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+  CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
 CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1
