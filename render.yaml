@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: claimclear
+    env: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.1-flash-lite
+      - key: EMBEDDING_MODEL
+        value: all-MiniLM-L6-v2
