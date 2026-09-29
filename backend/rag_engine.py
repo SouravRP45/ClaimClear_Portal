@@ -1,14 +1,14 @@
 """
-rag_engine.py — Pure-numpy in-memory vector store for policy document retrieval.
+rag_engine.py — Lightweight in-memory vector store for policy document retrieval.
 
-Replaces ChromaDB to avoid the C++ build tools requirement on Windows.
-For MVP-scale policy documents (a few hundred chunks) numpy cosine similarity
-is more than fast enough and requires zero compilation.
+Uses Google Gemini Embeddings (models/gemini-embedding-001) + NumPy cosine similarity.
+Runs entirely in API + NumPy, requiring zero heavy PyTorch/CUDA packages, and comfortably
+stays under 80MB memory (well within Render's 512MB free tier limit).
 """
 import re
 import logging
 import numpy as np
-from sentence_transformers import SentenceTransformer
+import google.generativeai as genai
 from config import config
 
 logger = logging.getLogger(__name__)
@@ -19,17 +19,17 @@ class RAGEngine:
     Builds an ephemeral in-memory vector index from policy text and retrieves
     the most semantically relevant chunks for a given denial reason query.
 
-    Implementation: sentence-transformers embeddings + numpy cosine similarity.
-    No C++ compilation required — works on any platform.
+    Implementation: Google Gemini Embeddings + pure NumPy cosine similarity.
+    No PyTorch, zero C++ compilation, minimal RAM footprint (<80MB).
     """
 
     def __init__(self) -> None:
-        logger.info(f"Loading embedding model: {config.EMBEDDING_MODEL}")
-        self.model = SentenceTransformer(config.EMBEDDING_MODEL)
+        self.embedding_model = config.EMBEDDING_MODEL
+        genai.configure(api_key=config.GEMINI_API_KEY)
         # session_id → {"chunks": list[str], "metadatas": list[dict],
         #                "embeddings": np.ndarray (N, D)}
         self._store: dict[str, dict] = {}
-        logger.info("RAGEngine (numpy backend) initialized")
+        logger.info(f"RAGEngine initialized with embedding model: {self.embedding_model}")
 
     # ── Internal helpers ─────────────────────────────────────────────────────
 
@@ -41,37 +41,44 @@ class RAGEngine:
             return f"approx. page {matches[-1].group(1)}"
         return "page unknown"
 
-    @staticmethod
-    def _cosine_similarity(query_vec: np.ndarray, matrix: np.ndarray) -> np.ndarray:
+    def _embed_texts(self, texts: list[str]) -> np.ndarray:
         """
-        Computes cosine similarity between a 1-D query vector and each row
-        of a 2-D embedding matrix.
-
-        Returns a 1-D array of similarities in range [-1, 1].
+        Embeds a list of texts using Gemini API with batching and L2 normalization.
+        Pre-normalizing makes cosine similarity a simple dot product.
         """
-        query_norm = np.linalg.norm(query_vec)
-        matrix_norms = np.linalg.norm(matrix, axis=1)
+        if not texts:
+            return np.empty((0, 3072), dtype=np.float32)
 
-        # Avoid division by zero
-        safe_norms = np.where(matrix_norms == 0, 1e-10, matrix_norms)
-        safe_query_norm = query_norm if query_norm > 0 else 1e-10
+        batch_size = 50
+        all_embeddings: list[list[float]] = []
 
-        dots = matrix @ query_vec  # (N,)
-        return dots / (safe_norms * safe_query_norm)
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i + batch_size]
+            res = genai.embed_content(
+                model=self.embedding_model,
+                content=batch,
+            )
+            # res['embedding'] contains the list of embeddings for the batch
+            emb_list = res.get("embedding", [])
+            # Handle both single list (if single item) or list of lists
+            if emb_list and isinstance(emb_list[0], (int, float)):
+                all_embeddings.append(emb_list)
+            else:
+                all_embeddings.extend(emb_list)
+
+        embeddings = np.array(all_embeddings, dtype=np.float32)
+
+        # L2-normalize each vector (rows)
+        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+        norms = np.where(norms == 0, 1e-10, norms)
+        return embeddings / norms
 
     # ── Public API ───────────────────────────────────────────────────────────
 
     def build_index(self, full_text: str, session_id: str) -> str:
         """
-        Chunks the policy text, embeds each chunk, and stores everything
-        in memory keyed by session_id.
-
-        Args:
-            full_text: Full extracted policy text with [PAGE N] markers
-            session_id: Unique session UUID
-
-        Returns:
-            session_id (collection name, for API compatibility)
+        Chunks the policy text, embeds each chunk using Gemini Embeddings,
+        and stores everything in memory keyed by session_id.
         """
         words = full_text.split()
         total_words = len(words)
@@ -110,14 +117,8 @@ class RAGEngine:
 
         logger.info(f"[{session_id}] Created {len(chunks)} chunks from {total_words} words")
 
-        # Embed all chunks in one batched call
-        embeddings: np.ndarray = self.model.encode(
-            chunks,
-            batch_size=32,
-            show_progress_bar=False,
-            convert_to_numpy=True,
-            normalize_embeddings=True,   # pre-normalize for faster cosine sim
-        )
+        # Embed all chunks
+        embeddings = self._embed_texts(chunks)
 
         self._store[session_id] = {
             "chunks": chunks,
@@ -140,7 +141,7 @@ class RAGEngine:
             {"text": str, "chunk_index": int, "page_hint": str, "distance": float}
 
         Note: "distance" here is 1 - cosine_similarity so that lower = more relevant,
-        matching the ChromaDB convention used in analysis_agent.py.
+        matching the convention used in analysis_agent.py.
         """
         if session_id not in self._store:
             raise ValueError(
@@ -153,15 +154,10 @@ class RAGEngine:
         metadatas = store["metadatas"]
         embeddings: np.ndarray = store["embeddings"]
 
-        # Embed the query (normalized)
-        query_vec: np.ndarray = self.model.encode(
-            [query],
-            show_progress_bar=False,
-            convert_to_numpy=True,
-            normalize_embeddings=True,
-        )[0]
+        # Embed the query (normalized vector of shape (D,))
+        query_vec = self._embed_texts([query])[0]
 
-        # Cosine similarity (embeddings are pre-normalized → dot product == cosine sim)
+        # Cosine similarity (both embeddings and query_vec are pre-normalized)
         similarities = embeddings @ query_vec  # (N,)
 
         # Take top_k indices (highest similarity)
@@ -192,3 +188,4 @@ class RAGEngine:
             logger.info(f"[{session_id}] Cleaned up in-memory index")
         else:
             logger.warning(f"[{session_id}] cleanup called but session not found")
+
