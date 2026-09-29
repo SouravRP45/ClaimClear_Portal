@@ -13,7 +13,7 @@ class Config:
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
     # ── Embeddings ──────────────────────────────────────────────────────────
-    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "models/gemini-embedding-001")
 
     # ── RAG ─────────────────────────────────────────────────────────────────
     CHUNK_SIZE: int = 400       # words per chunk (approximate tokens)
